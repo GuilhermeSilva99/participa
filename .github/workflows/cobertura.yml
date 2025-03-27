@@ -1,0 +1,39 @@
+name: PHP Test Coverage
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v3
+
+      - name: Configurar PHP e Composer
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: xdebug
+
+      - name: Instalar dependências
+        run: composer install --prefer-dist --no-progress --no-scripts
+            
+      - name: Criar arquivo .env
+        run: cp .env.example .env
+
+      - name: Gerar chave da aplicação
+        run: php artisan key:generate
+
+      - name: Rodar testes com cobertura
+        run: ./vendor/bin/phpunit --coverage-html=coverage-html
+
+      - name: Salvar cobertura como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: coverage-html
